@@ -1,3 +1,5 @@
+On a separate repository: https://github.com/DavidMainAccount/PyCloudIoT-generate-firmware
+
 As we are aiming to make some complex calculus with micropython using an specific external library (ulab) that you can find at: https://github.com/v923z/micropython-ulab , we are obliged to make our own version of micropython firmware per kind of node. In this first version, we will focus on the esp32 boards. 
 
 # Create ESP32 custom firmware
@@ -57,4 +59,7 @@ $(OBJ_MP): CFLAGS += -Wdouble-promotion -Wfloat-conversion
 
 Finally, we run **make USER_C_MODULES=../../../ulab** to build the new firmware. This will build your firmware at build-GENERIC/firmware.bin. Then you can use put it on the /configuration/firmware folder and run use it to flash your boards (already done with the scripts using esptool).
 
-
+credits:
+https://www.microdev.it/wp/en/2018/08/08/esp32-micropython-compiling-for-esp32/
+https://github.com/micropython/micropython/tree/master/ports/esp32
+https://github.com/micropython/micropython/tree/master/ports/esp32
