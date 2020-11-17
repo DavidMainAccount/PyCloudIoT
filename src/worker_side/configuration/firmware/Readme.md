@@ -59,7 +59,11 @@ $(OBJ_MP): CFLAGS += -Wdouble-promotion -Wfloat-conversion
 
 Finally, we run **make USER_C_MODULES=../../../ulab** to build the new firmware. This will build your firmware at build-GENERIC/firmware.bin. Then you can use put it on the /configuration/firmware folder and run use it to flash your boards (already done with the scripts using esptool).
 
-credits:
+# credits:
 https://www.microdev.it/wp/en/2018/08/08/esp32-micropython-compiling-for-esp32/
 https://github.com/micropython/micropython/tree/master/ports/esp32
 https://github.com/micropython/micropython/tree/master/ports/esp32
+
+
+# Firmawre without esp-32
+You can also use a firmware that does not have ulab. In this case, simply chose the esp-32... firmware on the upload script.
