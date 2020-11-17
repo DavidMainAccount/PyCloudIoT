@@ -2,23 +2,36 @@ import time
 import os
 import network
 import time
-from Libraries.mqttNew import MQTTClient
+import sys
+from Libraries.mqtt import MQTTClient
 from Libraries.messageTypesServer import messageTypesServer
 
 #####################################################################
 # Global variables for the execution and configuration of the node: #
 #####################################################################
 
-#initializes the wifi connection parametters
-ssid = "david"
-password = "david333"
-
-#Arduino Identification parameter
-idArd = "ARD1"
-
-#MQTT Server Connection parameters
-mqtt_server = '52.15.170.43'
+#init variables (wifi connection parametters, board id, mqtt server params)
+ssid = "null"
+password = "null"
+idArd = "null"
+mqtt_server = []
 port = 1883
+
+# Get environment configuration variables
+f = open("env.txt", "r")
+for line in f:
+    if "ssidWifi:" in line:
+        ssid = str(line)
+    elif "passWifi:" in line:
+        password = str(line)
+    elif "idArd:" in line:
+        idArd = str(line)
+    elif "brokerIP:" in line:
+        mqtt_server.append(str(line))
+
+if (ssid=="null") OR (password=="null") OR (idArd=="null") OR (mqtt_server == []):
+    print("Config file is not adequate, check it and upload it again under the name: env.txt")
+    sys.exit()
 
 #Iniciation constants
 status = 1 #1 => active, 0=> disconnected
@@ -29,6 +42,7 @@ cluster_id = "null"
 clust_chan = "null"
 clust_lead_chan = "null"
 chief_id = "null"
+active_nodes = 0
 
 #messageTypesServer
 splitter = "$PyIoTCloud$"
@@ -135,6 +149,7 @@ def msg_cb(topic, msg):
             chief_id = str(messageSplitted[1])
             new_cluster = str(messageSplitted[2])
             leader_bool = str(messageSplitted[3])
+            active_nodes = int(messageSplitted[4])
             joinCluster(new_cluster)
         elif(str(messageSplitted[0]) == str(MessageServer.getidMessage("QCM"))):
             chief_id = str(messageSplitted[1])
@@ -285,7 +300,7 @@ def consensusSimple(listAnswers):
         for j in range(0,len(listAnswers)):
             if(str(listAnswers[j]) == str(listAnswers[i])):
                 count = count + 1
-        if(count >= 2):
+        if(count >= int(active_nodes/2)+1):
             correctAnswer = listAnswers[i]
             return correctAnswer
     return listAnswers[0]
@@ -335,10 +350,16 @@ def connect_and_configure(client_id, mqtt_ip):
     return client
 
 #Function to retry to connect to the server
-def restart_and_reconnect(client_id, mqtt_ip):
-    print('Failed to connect to MQTT broker. Reconnecting...')
+def restart_and_reconnect(client_id, mqtt_ip,index):
+    print('Failed to connect to MQTT broker. Trying to connect to another valid server... Server: ' + str(index))
     time.sleep(1)
-    connect_and_configure(client_id, mqtt_ip)
+    index = index + 1
+    if(index >= len(mqtt_ip)):
+        index = 0
+    try:
+        connect_and_configure(client_id, mqtt_ip[index])
+    except OSError as e:
+        restart_and_reconnect(idArd,mqtt_server,index)
 
 
 ##################################
@@ -352,9 +373,9 @@ do_connect(ssid, password)
 
 #Initializes the connection with the mqtt server
 try:
-  client = connect_and_configure(idArd,mqtt_server)
+  client = connect_and_configure(idArd,mqtt_server[0])
 except OSError as e:
-  restart_and_reconnect(idArd,mqtt_server)
+  restart_and_reconnect(idArd,mqtt_server,0)
 
 ###################################################################
 # Loop code goes inside the loop here, this is called repeatedly: #
@@ -366,10 +387,9 @@ while True:
         sendKeepalive()
         checkToSend()
         if (i % 10 == 0):
-            showStatus()
-            
+            showStatus() 
 
-    time.sleep(duty_cycle) # Delay for 1 second. (no bajar de ahi!!!!!!)
+    time.sleep(duty_cycle)
 
 
 

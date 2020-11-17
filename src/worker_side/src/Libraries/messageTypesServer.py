@@ -40,9 +40,9 @@ class messageTypesServer:
     #The  structure  is 2+idChief+clusterName+leaderBoolean.
     #Where clusterName is the cluster to join
     #And leaderBoolean indicates if the node is the leader (1) or if its not(0)
-    def produceJCM(self,clusterName, leaderBoolean):
+    def produceJCM(self,clusterName, leaderBoolean,activeNodes):
         idMessage = 2
-        return str(idMessage) + self.splitter + self.idChief + self.splitter + str(clusterName) + self.splitter + str(leaderBoolean)
+        return str(idMessage) + self.splitter + self.idChief + self.splitter + str(clusterName) + self.splitter + str(leaderBoolean) + self.splitter + str(activeNodes)
         
     #Generates a Quit  cluster  Message  (QCM). Notifies  to  quit  a  cluster.
     #From  chief  to  slave. Message type 3. Send to the slave SDCH
@@ -65,26 +65,46 @@ class messageTypesServer:
     # Indicates to memorise  a  library  that  the  chief  finds useful in the cache of the slaves.
     #From   chief   to slave’s  cluster.Message type 5. Send to the cluster CDCH
     #The message’s structure is 5+idChief+libraryName+scriptContent.
-    def produceLPM(self,libraryName, scriptContent):
+    def produceLPMList(self,libraryName, scriptContent):
         idMessage = 5
-        return str(idMessage) + self.splitter + self.idChief + self.splitter + str(libraryName) + self.splitter + str(scriptContent)
+        payloadMaxSize=100
+        prefix = str(idMessage) + self.splitter + str(libraryName) + self.splitter
+        payloadMaxSize = 100 - len(prefix)
+        payloadChunked = [scriptContent[i:i+payloadMaxSize] for i in range(0, len(scriptContent), payloadMaxSize)]
+        LPMList = []
+        for chunk in range(0, len(payloadChunked)):
+            if(chunk == len(payloadChunked)-1):
+                LPMList.append(prefix + payloadChunked[chunk] + "PYCLEND")
+            else:
+                LPMList.append(prefix + payloadChunked[chunk])
+        return LPMList
     
     #Generates a Function  Submission  Message.
     #Transmits  a  function  to  be  executed by the nodes of the cluster.
     #From  the  chiefto  slave’s  cluster. Message type 6. Send to the cluster CDCH
     #The message’s structure is 6+idChief+functionName+scriptContent.
-    def produceFSM(self,functionName, scriptContent):
+    def produceFSMList(self,functionName, scriptContent):
         idMessage = 6
-        return str(idMessage) + self.splitter + self.idChief + self.splitter + str(functionName) + self.splitter + str(scriptContent)
+        payloadMaxSize=100
+        prefix = str(idMessage) + self.splitter + str(functionName) + self.splitter
+        payloadMaxSize = 100 - len(prefix)
+        payloadChunked = [scriptContent[i:i+payloadMaxSize] for i in range(0, len(scriptContent), payloadMaxSize)]
+        FSMList = []
+        for chunk in range(0, len(payloadChunked)):
+            if(chunk == len(payloadChunked)-1):
+                FSMList.append(prefix + payloadChunked[chunk] + "PYCLEND")
+            else:
+                FSMList.append(prefix + payloadChunked[chunk])
+        return FSMList
         
     #Consensus  Result  Message  (CRM).#This function transmit theresult  of  the  execution  the
     #the  cluster’s  leader  who  will operate  the  consensus  before  giving  a  final  answer
     #to the  Chief.
     #From  slave’s  on  acluster to the cluster’s leader. Message type 7. Send to the cluster CLDCH.
     #The  message’s  structure  is7+idSlave+taskName+answer.
-    def produceCRM(self,functionName, scriptContent):
+    def produceCRM(self,functionName, answer):
         idMessage = 7
-        return str(idMessage) + self.splitter + self.idChief + self.splitter + str(functionName) + self.splitter + str(scriptContent)
+        return str(idMessage) + self.splitter + self.idSlave + self.splitter + str(functionName) + self.splitter + str(answer)
 
     #Final  Answer  Message  (FAM). Used  to  answer  the  function  after  the  consensus.
     #From  cluster’s  leader  to chief. Message type 8. Send to the cluster FAM.
@@ -100,6 +120,13 @@ class messageTypesServer:
     def produceMDM(self, newPeriod):
         idMessage = 9
         return str(idMessage) + self.splitter + self.idChief + self.splitter + str(newPeriod)
+
+    #Final  Answer  Message Dispatcher (FAMD). Used  to  answer  the  function  after  the  consensus.
+    #From  cluster’s  leader  to chief. Message type 8. Send to the cluster FAM.
+    #The message’s structure is 8+functionName+answer.
+    def produceFAMD(self,functionName, answer):
+        idMessage = 10
+        return str(idMessage) + self.splitter + str(functionName) + self.splitter + str(answer)
 
     #Final  Answer  Message Dispatcher (FAMD). Used  to  answer  the  function  after  the  consensus.
     #From  cluster’s  leader  to chief. Message type 8. Send to the cluster FAM.

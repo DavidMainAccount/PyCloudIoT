@@ -40,9 +40,9 @@ class messageTypesServer:
     #The  structure  is 2+idChief+clusterName+leaderBoolean.
     #Where clusterName is the cluster to join
     #And leaderBoolean indicates if the node is the leader (1) or if its not(0)
-    def produceJCM(self,clusterName, leaderBoolean):
+    def produceJCM(self,clusterName, leaderBoolean,activeNodes):
         idMessage = 2
-        return str(idMessage) + self.splitter + self.idChief + self.splitter + str(clusterName) + self.splitter + str(leaderBoolean)
+        return str(idMessage) + self.splitter + self.idChief + self.splitter + str(clusterName) + self.splitter + str(leaderBoolean) + self.splitter + str(activeNodes)
         
     #Generates a Quit  cluster  Message  (QCM). Notifies  to  quit  a  cluster.
     #From  chief  to  slave. Message type 3. Send to the slave SDCH
@@ -120,6 +120,13 @@ class messageTypesServer:
     def produceMDM(self, newPeriod):
         idMessage = 9
         return str(idMessage) + self.splitter + self.idChief + self.splitter + str(newPeriod)
+
+    #Final  Answer  Message Dispatcher (FAMD). Used  to  answer  the  function  after  the  consensus.
+    #From  cluster’s  leader  to chief. Message type 8. Send to the cluster FAM.
+    #The message’s structure is 8+functionName+answer.
+    def produceFAMD(self,functionName, answer):
+        idMessage = 10
+        return str(idMessage) + self.splitter + str(functionName) + self.splitter + str(answer)
 
     #Final  Answer  Message Dispatcher (FAMD). Used  to  answer  the  function  after  the  consensus.
     #From  cluster’s  leader  to chief. Message type 8. Send to the cluster FAM.
