@@ -37,6 +37,7 @@ class listNodes:
         for node in self.listOfNodes:
             if(node.getNodeID() == str(idNode)):
                 node.updateTimestamp()
+                node.setActivesNodes(listOfClusters.getNumNodesCluster(node.getNodeID()))
                 node.notifyjoinCluster()
                 node.updatePeriodicity(periodicity)
                 listOfClusters.addNode(node)

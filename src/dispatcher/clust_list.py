@@ -139,7 +139,13 @@ class listClusters:
                     slowest = node
                     periodSlowest = int(node.getPeriodicity())
         return slowest
-        
+    
+    def getNumNodesCluster(self, clustId):
+        for cluster in listOfClusters:
+            if cluster.getClusterID == clustId
+                return cluster.getNodesInside()
+        return 0
+
     #Redistributes the among on the clusters, not to be done all time, it takes both time
     # and computing resources.
     def reDistributeNodes(self):

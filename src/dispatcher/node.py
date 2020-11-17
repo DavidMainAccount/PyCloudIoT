@@ -14,7 +14,8 @@ class Node:
         self.splitter = splitt
         self.MessageServer = messageServer
         self.periodicity = periodicityNode
-        
+        self.activeNodesClust = 0
+
         #MQTT params
         self.broker_address = broker_addressMQTT
         self.port = portMQTT
@@ -24,7 +25,11 @@ class Node:
         self.timeStamp = int(round(time.time() * 1000))
         self.SDCH = str(self.nodeID) + "DCH"
         self.leaderBool = 0 #1 => leader, 0=> not a leader
-        
+    
+    # Set active nodes clust
+    def setActivesNodes(self, activeNodesClust):
+        self.activeNodesClust = activeNodesClust
+
     #Getter slave dedicated channel SDCH
     def getSDCH(self):
         return self.SDCH
@@ -78,7 +83,7 @@ class Node:
     def setLeaderOut(self):
        self.leaderBool = 0
        self.notifyLead()
-    
+
     #Set the maxSilenceInterval
     def setMaxSilenceInterval(self, maxSilenceInterval):
        self.maxSilenceInterval = maxSilenceInterval
@@ -109,7 +114,7 @@ class Node:
         
     #Notifies the real node to join a cluster
     def notifyjoinCluster(self):
-        payload = self.MessageServer.produceJCM(self.clusterAssociated,self.leaderBool)
+        payload = self.MessageServer.produceJCM(self.clusterAssociated,self.leaderBool,self.activeNodesClust)
         logging.info("-----> Message Sent: [" + str(self.SDCH) + "] " + payload)
         publish.single(str(self.SDCH), payload, hostname= self.broker_address, port = int(self.port))
         

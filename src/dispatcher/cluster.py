@@ -36,6 +36,10 @@ class Cluster:
     #Getter the places left in the cluster
     def getNodesLeft(self):
         return self.capacity - self.nodesInside
+
+    #Getter the places occupied in the cluster
+    def getNodesInside(self):
+        return self.nodesInside
     
     #Getter the places in the cluster
     def getCapacity(self):
