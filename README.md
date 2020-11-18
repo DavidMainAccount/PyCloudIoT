@@ -1,5 +1,5 @@
-# PyCloudIoT-DSN
-PyCloudIoT infrastructure described at the DSN submitted conference paper
+# PyCloudIoT
+PyCloudIoT infrastructure description
 
 # Description
 In this repository, we will present the code that goes with the paper submited to DSN about PyCloudIoT.
