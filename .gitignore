@@ -1,2 +1,4 @@
 .DS_Store
 __pycache__
+flash_logs.txt
+upload_logs.txt
